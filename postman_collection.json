@@ -1,0 +1,127 @@
+{
+  "info": {
+    "_postman_id": "c0c7b8d8-0000-4f5a-9f8b-1a2b3c4d5e6f",
+    "name": "Portfolio API - Local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Portfolio Summary",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/portfolio",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","portfolio"]
+        }
+      }
+    },
+    {
+      "name": "Get Categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/categories",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","categories"]
+        }
+      }
+    },
+    {
+      "name": "Add Asset",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"symbol\": \"MSFT\",\n  \"name\": \"Microsoft Corp.\",\n  \"quantity\": 3,\n  \"purchasePrice\": 250,\n  \"categoryName\": \"Stocks\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9091/api/portfolio/assets",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","portfolio","assets"]
+        }
+      }
+    },
+    {
+      "name": "Delete Asset (replace id)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/portfolio/assets/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","portfolio","assets","1"]
+        }
+      }
+    },
+    {
+      "name": "Get Sentiment (replace TICKER)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/sentiment/AAPL",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","sentiment","AAPL"]
+        }
+      }
+    },
+    {
+      "name": "Debug - Get Assets",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/debug/assets",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","debug","assets"]
+        }
+      }
+    },
+    {
+      "name": "Debug - Counts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/debug/counts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","debug","counts"]
+        }
+      }
+    },
+    {
+      "name": "Debug - Seed DB",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9091/api/debug/seed",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "9091",
+          "path": ["api","debug","seed"]
+        }
+      }
+    }
+  ]
+}
