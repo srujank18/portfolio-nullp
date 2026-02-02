@@ -1,7 +1,7 @@
 import React from 'react';
 import api from '../api';
 
-const AssetTable = ({ assets, onAssetChange, apiBase = 'http://localhost:9091' }) => {
+const AssetTable = ({ assets, onAssetChange }) => {
     const handleDelete = async (id) => {
         try {
             await api.delete(`/api/portfolio/assets/${id}`);

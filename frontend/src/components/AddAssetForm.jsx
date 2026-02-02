@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 
-const AddAssetForm = ({ onAssetAdded, apiBase = 'http://localhost:9091' }) => {
+const AddAssetForm = ({ onAssetAdded }) => {
     const [formData, setFormData] = useState({
         symbol: '',
         name: '',
@@ -18,32 +18,70 @@ const AddAssetForm = ({ onAssetAdded, apiBase = 'http://localhost:9091' }) => {
         api.get('/api/categories')
             .then(res => setCategories(res.data))
             .catch(err => console.error("Error fetching categories", err));
-    }, [apiBase]);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
+        const payload = {
+            ...formData,
+            quantity: parseFloat(formData.quantity),
+            purchasePrice: parseFloat(formData.purchasePrice)
+        };
+
         try {
-            // Coerce numeric fields into numbers before sending
-            const payload = {
-                ...formData,
-                quantity: parseFloat(formData.quantity),
-                purchasePrice: parseFloat(formData.purchasePrice)
-            };
             const res = await api.post('/api/portfolio/assets', payload);
             console.log('Asset add response:', res.data);
-            setFormData({
-                symbol: '',
-                name: '',
-                quantity: '',
-                purchasePrice: '',
-                categoryName: 'Stocks'
-            });
+            setFormData({ symbol: '', name: '', quantity: '', purchasePrice: '', categoryName: 'Stocks' });
             onAssetAdded();
             alert('Asset added: ' + (res.data && res.data.symbol ? res.data.symbol : 'ok'));
         } catch (error) {
+            // Improved logging to help diagnose Network Error / CORS / server issues
             console.error("Error adding asset", error);
-            const msg = error?.response?.data ? JSON.stringify(error.response.data) : error.message;
+            try {
+                console.error('Axios error details:', {
+                    message: error?.message,
+                    request: error?.request,
+                    response: error?.response && {
+                        status: error.response.status,
+                        headers: error.response.headers,
+                        data: error.response.data
+                    }
+                });
+            } catch (logErr) {
+                console.error('Error while logging axios details', logErr);
+            }
+
+            // If request was sent but no response received, try to confirm creation by fetching portfolio
+            if (error && error.request && !error.response) {
+                try {
+                    const summaryResp = await api.get('/api/portfolio');
+                    const assets = (summaryResp && summaryResp.data && summaryResp.data.assets) || [];
+                    const created = assets.find(a => a.symbol && a.symbol.toLowerCase() === (payload.symbol || '').toLowerCase());
+                    if (created) {
+                        // Consider it a success: backend processed the request but the response was lost/blocked
+                        setFormData({ symbol: '', name: '', quantity: '', purchasePrice: '', categoryName: 'Stocks' });
+                        onAssetAdded();
+                        alert('Asset added Successfully (server processed request).');
+                        return;
+                    }
+                } catch (confirmErr) {
+                    console.error('Error confirming creation after network error', confirmErr);
+                }
+            }
+
+            let msg;
+            if (error && error.response) {
+                // Server responded with a status code outside 2xx
+                msg = `Server responded ${error.response.status}: ${JSON.stringify(error.response.data)}`;
+            } else if (error && error.request) {
+                // Request was made but no response received
+                msg = 'No response received from server (network/CORS/server unreachable)';
+            } else {
+                // Something else caused the error
+                msg = error?.message || 'Unknown error';
+            }
+
             alert("Failed to add asset: " + msg);
         } finally {
             setSubmitting(false);

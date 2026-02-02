@@ -6,7 +6,8 @@ import AddAssetForm from './components/AddAssetForm';
 import AllocationChart from './components/AllocationChart';
 import SentimentPanel from './components/SentimentPanel';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:9091';
+// Use VITE_API_URL if set; default now matches backend default 9092
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:9092';
 
 function App() {
   const [summary, setSummary] = useState(null);
