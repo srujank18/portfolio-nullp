@@ -23,6 +23,6 @@ ON DUPLICATE KEY UPDATE symbol = VALUES(symbol);
 
 -- News sentiment samples
 INSERT INTO news_sentiment (ticker, sentiment_score, summary) VALUES
-('AAPL', 0.85, 'Apple releases new Vision Pro with great reviews.'),
+('AAPL', 0.85, 'Apple releases new Vision Pro with great reviews. Good to Buy now.'),
 ('GOOG', 0.70, 'Google AI integration is progressing well.'),
 ('TSLA', 0.30, 'Tesla faces production delays in new model release.');

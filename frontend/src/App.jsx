@@ -5,6 +5,7 @@ import AssetTable from './components/AssetTable';
 import AddAssetForm from './components/AddAssetForm';
 import AllocationChart from './components/AllocationChart';
 import SentimentPanel from './components/SentimentPanel';
+import AiPanel from './components/AiPanel';
 
 // Use VITE_API_URL if set; default now matches backend default 9092
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:9092';
@@ -44,7 +45,10 @@ function App() {
       {/* Bottom Row: Assets & Add Form */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', paddingBottom: '2rem' }}>
         <AssetTable assets={summary ? summary.assets : []} onAssetChange={handleRefresh} apiBase={API_BASE} />
-        <AddAssetForm onAssetAdded={handleRefresh} apiBase={API_BASE} />
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          <AddAssetForm onAssetAdded={handleRefresh} apiBase={API_BASE} />
+          <AiPanel />
+        </div>
       </div>
     </div>
   );
