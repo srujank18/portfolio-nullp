@@ -7,68 +7,96 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const CategoryPerformanceChart = ({ summary }) => {
     if (!summary || !summary.assets || summary.assets.length === 0) {
         return (
-            <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '350px' }}>
                 <p style={{ color: 'var(--text-secondary)' }}>No asset data available</p>
             </div>
         );
     }
 
-    // Group assets by category and calculate total value per category
+    // Group assets by category and calculate metrics
     const categoryData = {};
     summary.assets.forEach(asset => {
         const category = asset.categoryName || 'Other';
         if (!categoryData[category]) {
             categoryData[category] = {
-                totalValue: 0,
-                totalCost: 0,
+                totalCurrentValue: 0,
+                totalCostBasis: 0,
                 count: 0
             };
         }
-        categoryData[category].totalValue += asset.currentValue || 0;
-        categoryData[category].totalCost += (asset.quantity * asset.purchasePrice) || 0;
+        const costBasis = asset.quantity * asset.purchasePrice;
+        categoryData[category].totalCurrentValue += asset.currentValue || 0;
+        categoryData[category].totalCostBasis += costBasis;
         categoryData[category].count += 1;
     });
 
-    const labels = Object.keys(categoryData);
-    const valueData = labels.map(cat => categoryData[cat].totalValue);
-    const costData = labels.map(cat => categoryData[cat].totalCost);
-    const gainLossData = labels.map((cat, idx) => valueData[idx] - costData[idx]);
+    const labels = Object.keys(categoryData).sort();
+    const currentValueData = labels.map(cat => categoryData[cat].totalCurrentValue);
+    const costBasisData = labels.map(cat => categoryData[cat].totalCostBasis);
+    const gainLossData = labels.map((cat, idx) => currentValueData[idx] - costBasisData[idx]);
 
     const data = {
         labels: labels,
         datasets: [
             {
                 label: 'Current Value',
-                data: valueData,
-                backgroundColor: '#38bdf8',
-                borderColor: '#0369a1',
+                data: currentValueData,
+                backgroundColor: '#a855f7',
+                borderColor: '#9333ea',
                 borderWidth: 1,
+                borderRadius: 4,
+                hoverBackgroundColor: '#c084fc',
             },
             {
                 label: 'Cost Basis',
-                data: costData,
-                backgroundColor: '#818cf8',
-                borderColor: '#4f46e5',
+                data: costBasisData,
+                backgroundColor: '#06b6d4',
+                borderColor: '#0891b2',
                 borderWidth: 1,
+                borderRadius: 4,
+                hoverBackgroundColor: '#22d3ee',
             },
             {
                 label: 'Gain/Loss',
                 data: gainLossData,
-                backgroundColor: gainLossData.map(val => val >= 0 ? '#4ade80' : '#f87171'),
-                borderColor: gainLossData.map(val => val >= 0 ? '#15803d' : '#dc2626'),
+                backgroundColor: gainLossData.map(val => val >= 0 ? '#10b981' : '#ef4444'),
+                borderColor: gainLossData.map(val => val >= 0 ? '#059669' : '#dc2626'),
                 borderWidth: 1,
+                borderRadius: 4,
+                hoverBackgroundColor: gainLossData.map(val => val >= 0 ? '#34d399' : '#f87171'),
             }
         ],
     };
 
     const options = {
+        indexAxis: 'x',
         plugins: {
             legend: {
                 position: 'top',
                 labels: {
-                    color: '#94a3b8',
-                    font: { family: 'Inter' },
+                    color: '#b8b8b8',
+                    font: {
+                        family: 'Inter',
+                        size: 12,
+                        weight: '500',
+                    },
                     padding: 15,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                }
+            },
+            tooltip: {
+                backgroundColor: '#1f1f1f',
+                borderColor: '#2a2a2a',
+                borderWidth: 1,
+                titleColor: '#a855f7',
+                bodyColor: '#b8b8b8',
+                padding: 12,
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed.y;
+                        return ` $${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+                    }
                 }
             }
         },
@@ -78,21 +106,31 @@ const CategoryPerformanceChart = ({ summary }) => {
             y: {
                 beginAtZero: true,
                 ticks: {
-                    color: '#94a3b8',
+                    color: '#808080',
+                    font: {
+                        family: 'Inter',
+                        size: 11,
+                    },
                     callback: function(value) {
-                        return '$' + value.toFixed(0);
+                        return '$' + (value / 1000).toFixed(0) + 'k';
                     }
                 },
                 grid: {
-                    color: '#334155',
+                    color: '#2a2a2a',
+                    drawBorder: false,
                 }
             },
             x: {
                 ticks: {
-                    color: '#94a3b8',
+                    color: '#b8b8b8',
+                    font: {
+                        family: 'Inter',
+                        size: 11,
+                    }
                 },
                 grid: {
                     display: false,
+                    drawBorder: false,
                 }
             }
         }
@@ -100,8 +138,11 @@ const CategoryPerformanceChart = ({ summary }) => {
 
     return (
         <div className="card">
-            <h2>Category Performance</h2>
-            <div style={{ height: '300px', position: 'relative' }}>
+            <h2>Category Performance Analysis</h2>
+            <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                Current value vs. cost basis and profit/loss by category
+            </p>
+            <div style={{ height: '350px', position: 'relative' }}>
                 <Bar data={data} options={options} />
             </div>
         </div>
