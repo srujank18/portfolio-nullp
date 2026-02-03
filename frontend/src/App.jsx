@@ -4,6 +4,9 @@ import PortfolioSummary from './components/PortfolioSummary';
 import AssetTable from './components/AssetTable';
 import AddAssetForm from './components/AddAssetForm';
 import AllocationChart from './components/AllocationChart';
+import CategoryPerformanceChart from './components/CategoryPerformanceChart';
+import CategoryDistributionChart from './components/CategoryDistributionChart';
+import CategoryBreakdown from './components/CategoryBreakdown';
 import SentimentPanel from './components/SentimentPanel';
 import AiPanel from './components/AiPanel';
 
@@ -34,21 +37,33 @@ function App() {
         <h1>Portfolio Manager</h1>
       </header>
 
-      {/* Top Row: Summary & Chart */}
+      {/* Portfolio Summary */}
       <PortfolioSummary summary={summary} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      {/* Main Charts Row: Allocation, Distribution, Sentiment */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         <AllocationChart summary={summary} />
+        <CategoryDistributionChart summary={summary} />
         <SentimentPanel apiBase={API_BASE} />
       </div>
 
-      {/* Bottom Row: Assets & Add Form */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', paddingBottom: '2rem' }}>
+      {/* Category Performance Chart */}
+      <div style={{ marginBottom: '2rem' }}>
+        <CategoryPerformanceChart summary={summary} />
+      </div>
+
+      {/* Assets and Add Form Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         <AssetTable assets={summary ? summary.assets : []} onAssetChange={handleRefresh} apiBase={API_BASE} />
         <div style={{ display: 'grid', gap: '1rem' }}>
           <AddAssetForm onAssetAdded={handleRefresh} apiBase={API_BASE} />
           <AiPanel />
         </div>
+      </div>
+
+      {/* Category Breakdown - Full Width */}
+      <div style={{ marginBottom: '2rem' }}>
+        <CategoryBreakdown summary={summary} />
       </div>
     </div>
   );
