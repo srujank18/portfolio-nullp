@@ -1,15 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api';
+import UpdateAssetModal from './UpdateAssetModal';
 
 const AssetTable = ({ assets, onAssetChange }) => {
+    const [editingAsset, setEditingAsset] = useState(null);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        // Fetch categories for dropdown in modal
+        api.get('/api/categories')
+            .then(res => setCategories(res.data))
+            .catch(err => console.error("Error fetching categories", err));
+    }, []);
+
     const handleDelete = async (id) => {
-        try {
-            await api.delete(`/api/portfolio/assets/${id}`);
-            onAssetChange();
-        } catch (error) {
-            console.error('Delete error', error);
-            alert('Failed to delete asset');
+        if (window.confirm('Are you sure you want to sell this asset?')) {
+            try {
+                await api.delete(`/api/portfolio/assets/${id}`);
+                onAssetChange();
+            } catch (error) {
+                console.error('Delete error', error);
+                alert('Failed to delete asset');
+            }
         }
+    };
+
+    const handleEditClick = (asset) => {
+        setEditingAsset(asset);
+    };
+
+    const handleUpdateSuccess = () => {
+        onAssetChange();
     };
 
     return (
@@ -27,11 +48,15 @@ const AssetTable = ({ assets, onAssetChange }) => {
                             <th>Qty</th>
                             <th>Avg Price</th>
                             <th>Current Value</th>
+                            <th>Gain/Loss</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {assets.map((asset) => (
+                        {assets.map((asset) => {
+                            const gainLoss = asset.currentValue - (asset.quantity * asset.purchasePrice);
+                            const gainLossColor = gainLoss >= 0 ? 'var(--success)' : 'var(--danger)';
+                            return (
                             <tr key={asset.id}>
                                 <td style={{ fontWeight: 'bold' }}>{asset.symbol}</td>
                                 <td>{asset.name}</td>
@@ -43,7 +68,17 @@ const AssetTable = ({ assets, onAssetChange }) => {
                                 }}>
                                     ${asset.currentValue.toLocaleString()}
                                 </td>
+                                <td style={{ color: gainLossColor }}>
+                                    ${gainLoss.toLocaleString()}
+                                </td>
                                 <td>
+                                    <button
+                                        className="btn"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', marginRight: '0.5rem' }}
+                                        onClick={() => handleEditClick(asset)}
+                                    >
+                                        Edit
+                                    </button>
                                     <button
                                         className="btn btn-danger"
                                         style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
@@ -53,9 +88,18 @@ const AssetTable = ({ assets, onAssetChange }) => {
                                     </button>
                                 </td>
                             </tr>
-                        ))}
+                        );
+                        })}
                     </tbody>
                 </table>
+            )}
+            {editingAsset && (
+                <UpdateAssetModal
+                    asset={editingAsset}
+                    categories={categories}
+                    onClose={() => setEditingAsset(null)}
+                    onSuccess={handleUpdateSuccess}
+                />
             )}
         </div>
     );

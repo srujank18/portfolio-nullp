@@ -43,4 +43,15 @@ public class PortfolioController {
         portfolioService.removeAsset(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/assets/{id}")
+    public ResponseEntity<?> updateAsset(@PathVariable Long id, @RequestBody AssetDTO assetDTO) {
+        try {
+            Asset updated = portfolioService.updateAsset(id, assetDTO);
+            return ResponseEntity.ok(updated);
+        } catch (Exception ex) {
+            log.error("Error while updating asset: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(500).body(java.util.Map.of("error", "Failed to update asset", "message", ex.getMessage()));
+        }
+    }
 }

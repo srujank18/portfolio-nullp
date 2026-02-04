@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from './api';
 import PortfolioSummary from './components/PortfolioSummary';
 import AssetTable from './components/AssetTable';
 import AddAssetForm from './components/AddAssetForm';
@@ -18,8 +18,11 @@ function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchPortfolio = () => {
-    axios.get(`${API_BASE}/api/portfolio`)
-      .then(res => setSummary(res.data))
+    api.get(`/api/portfolio`)
+      .then(res => {
+        console.log('Portfolio fetched successfully:', res.data);
+        setSummary(res.data);
+      })
       .catch(err => console.error("Error connecting to backend", err));
   };
 
@@ -28,6 +31,7 @@ function App() {
   }, [refreshTrigger]);
 
   const handleRefresh = () => {
+    console.log('Refreshing portfolio...');
     setRefreshTrigger(prev => prev + 1);
   };
 

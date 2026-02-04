@@ -117,4 +117,29 @@ public class PortfolioService {
     public void removeAsset(Long assetId) {
         assetRepository.deleteById(assetId);
     }
+
+    @Transactional
+    public Asset updateAsset(Long assetId, AssetDTO assetDTO) {
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
+
+        // Update category if changed
+        if (!asset.getCategory().getName().equals(assetDTO.getCategoryName())) {
+            Category category = categoryRepository.findByName(assetDTO.getCategoryName());
+            if (category == null) {
+                // Create category if it does not exist
+                Category newCat = new Category();
+                newCat.setName(assetDTO.getCategoryName());
+                category = categoryRepository.save(newCat);
+            }
+            asset.setCategory(category);
+        }
+
+        // Update other fields
+        asset.setName(assetDTO.getName());
+        asset.setQuantity(assetDTO.getQuantity());
+        asset.setPurchasePrice(assetDTO.getPurchasePrice());
+
+        return assetRepository.save(asset);
+    }
 }
